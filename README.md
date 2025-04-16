@@ -79,7 +79,7 @@ ORDER BY identificacion, ranking
 
 ### Utilización de la clase `df_upload_sql`
 
-En el punto 2, se utilizó la clase `df_upload_sql` para cargar las dos hojas del Excel a la bodega en la librería `work_sas`
+En el punto 3, se utilizó la clase `df_upload_sql` para cargar las dos hojas del Excel a la bodega en la librería `work_sas`
 
 ### 1. Crear tablas temporales con datos distintos
 
