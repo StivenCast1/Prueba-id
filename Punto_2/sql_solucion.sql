@@ -30,7 +30,7 @@ select distinct lower(tipo_documento) as tipo_documento
 from work_sas.stiv_pruebaid_clientes; /*CORRECCION*/
 select 
 	case 
-		when lower(estado_tarjeta) = 'açtiva' then 'Activa'
+		when lower(estado_tarjeta) = 'aÃ§tiva' then 'Activa'
 		when lower(estado_tarjeta) = 'inativa' then 'Inactiva'
 		else estado_tarjeta
 	end as estado_tarjeta
