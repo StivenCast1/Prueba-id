@@ -1,4 +1,79 @@
 # Prueba-id
+---
+## Paso a Paso para el Punto 2
+
+### Utilización de la clase `df_upload_sql`
+
+En el punto 2, se utilizó la clase `df_upload_sql` para cargar las dos hojas del Excel a la bodega en la librería `work_sas`.
+
+### 1. Crear la tabla `bd_clientes` con los datos de clientes
+
+```sql
+WITH bd_clientes AS (
+    SELECT nombre, identificacion, LOWER(tipo_documento) AS tipo_documento
+    FROM work_sas.stiv_pruebaid_clientes
+)
+```
+
+### 2. Crear la tabla `bd_transacciones` con los datos de transacciones
+
+```sql
+bd_transacciones AS (
+    SELECT identificacion, fecha_transaccion, id_transaccion, codigo_categoria, valor_compra
+    FROM work_sas.stiv_pruebaid_transacciones
+    /* WHERE fecha_transaccion >= '5/12/2022' AND fecha_transaccion <= '25/12/2024' DEFINIR FECHAS DE INTERES */
+)
+```
+
+### 3. Crear la tabla `bd_categorias_consumo` con los datos de categorías de consumo
+
+```sql
+bd_categorias_consumo AS (
+    SELECT codigo_categoria, nombre_categoria, ciudad
+    FROM work_sas.stiv_pruebaid_categorias_consumo
+)
+```
+
+### 4. Crear la tabla `cruce` con la unión de clientes, transacciones y categorías de consumo
+
+```sql
+cruce AS (
+    SELECT bd_clientes.*, fecha_transaccion, id_transaccion, valor_compra, nombre_categoria, ciudad
+    FROM bd_clientes
+    LEFT JOIN bd_transacciones ON bd_clientes.identificacion = bd_transacciones.identificacion
+    LEFT JOIN bd_categorias_consumo ON bd_transacciones.codigo_categoria = bd_categorias_consumo.codigo_categoria
+)
+```
+
+### 5. Crear la tabla `conteo` con el conteo de transacciones por cliente y categoría
+
+```sql
+conteo AS (
+    SELECT nombre, identificacion, tipo_documento, nombre_categoria, COUNT(id_transaccion) AS cantidad_compras, MAX(fecha_transaccion) AS maxima_fecha_transaccion
+    FROM cruce
+    GROUP BY 1, 2, 3, 4
+)
+```
+
+### 6. Crear la tabla `rankeo` con el ranking de categorías por cliente
+
+```sql
+rankeo AS (
+    SELECT *, ROW_NUMBER() OVER (PARTITION BY identificacion, tipo_documento ORDER BY cantidad_compras DESC, maxima_fecha_transaccion DESC) AS ranking
+    FROM conteo
+)
+```
+
+### 7. Seleccionar las categorías más relevantes por cliente
+
+```sql
+SELECT *
+FROM rankeo
+WHERE ranking <= 2 /* CAMBIAR EL 2 POR LAS N CATEGORIAS QUE SE QUIEREN CONSULTAR CAMBIANDO EL IGUAL POR <= o >= */
+ORDER BY identificacion, ranking
+```
+
+---
 
 ## Paso a Paso para el Punto 3
 
